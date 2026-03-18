@@ -5,6 +5,11 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Preconnect for faster Google Fonts resolution -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Inter font: 400 regular · 500 medium · 600 semi-bold · 700 bold -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>Momentum - Habit &amp; Goal Tracker</title>
   <meta name="description" content="Momentum — track habits, crush goals, and visualize your progress every day." />
 
@@ -29,7 +34,7 @@
         // If localStorage is blocked, default to dark
         document.documentElement.classList.add('dark');
       }
-    })();
+    });
   </script>
 </head>
 
