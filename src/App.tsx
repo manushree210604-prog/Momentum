@@ -10,7 +10,7 @@ import { Reports } from './pages/Reports';
 function App() {
   return (
     <DataProvider>
-      <HashRouter basename={import.meta.env.BASE_URL}>
+      <HashRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
