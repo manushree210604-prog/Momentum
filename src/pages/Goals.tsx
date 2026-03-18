@@ -1,10 +1,11 @@
 import { useDataContext } from '../contexts/DataContext';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Target, Plus, CheckCircle2, Trash2, Pencil } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { EditGoalModal } from '../components/EditGoalModal';
+import { Confetti } from '../components/Confetti';
 import type { Goal } from '../types';
 
 const CATEGORIES = ['Study', 'Productivity', 'Health', 'Personal'];
@@ -18,6 +19,15 @@ export function Goals() {
     const [newDeadline, setNewDeadline] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
     const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
+    const [confettiActive, setConfettiActive] = useState(false);
+
+    const handleProgressUpdate = useCallback((id: string, progress: number) => {
+        const existing = goals.find(g => g.id === id);
+        if (progress === 100 && existing?.status !== 'Completed') {
+            setConfettiActive(true);
+        }
+        updateGoalProgress(id, progress);
+    }, [goals, updateGoalProgress]);
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,93 +39,90 @@ export function Goals() {
     };
 
     return (
-        <div className="space-y-section animate-in fade-in duration-500">
+        <>
+        <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
+        <div className="space-y-12 animate-box-in">
             {/* ── Header ── */}
-            <header className="flex justify-between items-center mb-8">
+            <header className="flex justify-between items-end mb-16 px-2">
                 <div>
-                    <h1 className="text-4xl font-bold tracking-tight mb-2 text-slate-900 dark:text-slate-100">Goals</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Aim high. Break it down. Execute.</p>
+                    <span className="section-label">Strategy & Objectives</span>
+                    <h1 className="text-6xl font-black tracking-tighter mb-4 text-slate-900 dark:text-white leading-none">
+                        Goals
+                    </h1>
+                    <p className="text-xl text-slate-500 dark:text-slate-400 font-bold tracking-tight italic opacity-80">Aim with precision. Execute with discipline.</p>
                 </div>
                 <button
                     onClick={() => setShowAdd(!showAdd)}
-                    className="bg-accent hover:bg-accent/90 text-white px-5 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2 shadow-lg shadow-accent/20"
+                    className="bg-accent hover:opacity-90 text-white px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 italic"
                 >
-                    <Plus size={20} /> New Goal
+                    <Plus size={22} strokeWidth={3} /> Define Objective
                 </button>
             </header>
 
             {/* ── Add form ── */}
             {showAdd && (
-                <form onSubmit={handleAdd} className="momentum-card flex flex-col sm:flex-row items-end gap-4 mb-8 border-accent/30 animate-in slide-in-from-top-4">
-                    <div className="flex-1 w-full">
-                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Goal Title</label>
+                <form onSubmit={handleAdd} className="momentum-card flex flex-col lg:flex-row items-end gap-8 mb-16 border-accent/20 bg-accent/[0.02] dark:bg-accent/[0.03] animate-in slide-in-from-top-6 duration-700">
+                    <div className="flex-[2] w-full group">
+                        <span className="section-label">Objective Title</span>
                         <input
                             autoFocus value={newTitle} onChange={e => setNewTitle(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700
-                                       rounded-lg px-4 py-2.5 text-slate-900 dark:text-white
-                                       focus:outline-none focus:border-accent transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                            placeholder="e.g. Master React Native"
+                            className="box-input"
+                            placeholder="e.g. Master Structural Design"
                         />
                     </div>
-                    <div className="w-full sm:w-48">
-                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Deadline</label>
+                    <div className="w-full lg:w-56">
+                        <span className="section-label">Deadline Cycle</span>
                         <input type="date" value={newDeadline} onChange={e => setNewDeadline(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700
-                                       rounded-lg px-4 py-2 text-slate-900 dark:text-white
-                                       focus:outline-none focus:border-accent transition-colors block"
+                            className="box-input"
                         />
                     </div>
-                    <div className="w-full sm:w-40">
-                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Category</label>
+                    <div className="w-full lg:w-56">
+                        <span className="section-label">Classification</span>
                         <select value={newCat} onChange={e => setNewCat(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700
-                                       rounded-lg px-4 py-3 text-slate-900 dark:text-white
-                                       focus:outline-none focus:border-accent transition-colors"
+                            className="box-input cursor-pointer"
                         >
-                            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                            {CATEGORIES.map(c => <option key={c} className="bg-white dark:bg-slate-900 font-bold">{c}</option>)}
                         </select>
                     </div>
-                    <button type="submit" className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-white px-6 py-2.5 rounded-lg font-medium transition-colors h-[46px]">
-                        Save
+                    <button type="submit" className="w-full lg:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-10 py-4 rounded-xl font-black text-xs uppercase tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all h-[64px] shadow-2xl italic">
+                        Initialize
                     </button>
                 </form>
             )}
 
             {/* ── Empty state ── */}
             {goals.length === 0 ? (
-                <div className="momentum-card flex flex-col items-center justify-center text-center py-24 border-dashed">
-                    <div className="relative mb-6">
-                        <div className="w-20 h-20 rounded-3xl bg-accent/10 border border-accent/20 flex items-center justify-center">
-                            <Target className="text-accent" size={36} />
-                        </div>
-                        <div className="absolute -inset-2 rounded-3xl border border-accent/10 animate-pulse" />
+                <div className="momentum-card flex flex-col items-center justify-center text-center py-32 border-dashed border-2 bg-transparent shadow-none border-slate-200 dark:border-white/10">
+                    <div className="stat-card-icon mb-10 text-accent scale-125 rotate-6 bg-accent/5 border-accent/10 shadow-none">
+                        <Target size={44} strokeWidth={2.5} />
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3">No goals set yet</h3>
-                    <p className="text-slate-500 dark:text-slate-400 max-w-sm text-sm leading-relaxed mb-8">
-                        Goals without deadlines are just wishes. Define what you want to achieve, set a deadline, and track your progress every step of the way.
+                    <span className="section-label">Blueprint Empty</span>
+                    <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter italic uppercase">Define Your Vision</h3>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-sm font-bold leading-relaxed mb-12 text-xl italic opacity-80">
+                        Goals without deadlines are just wishes. Define what you want to achieve.
                     </p>
-                    <div className="flex flex-wrap justify-center gap-2 mb-8">
-                        {['Read 12 books this year', 'Run a 5K', 'Ship a side project', 'Learn Spanish'].map(idea => (
+                    <div className="flex flex-wrap justify-center gap-4 mb-12">
+                        {['Master Rust', 'Zero Inbox', 'Launch Beta', '10K Steps'].map(idea => (
                             <button key={idea}
                                 onClick={() => { setNewTitle(idea); setShowAdd(true); }}
-                                className="text-xs px-3 py-1.5 rounded-full
-                                           bg-slate-100 dark:bg-slate-700/60
-                                           border border-slate-200 dark:border-slate-600/50
-                                           text-slate-500 dark:text-slate-400
-                                           hover:text-accent hover:border-accent/30 hover:bg-accent/5 transition-colors"
+                                className="text-[10px] uppercase px-5 py-2.5 font-black tracking-[0.2em] rounded-xl
+                                           bg-slate-50 dark:bg-white/5
+                                           border-2 border-slate-100 dark:border-white/5
+                                           text-slate-400 dark:text-slate-500 italic
+                                           hover:text-accent hover:border-accent/30 transition-all hover:-translate-y-1"
                             >
                                 {idea}
                             </button>
                         ))}
                     </div>
                     <button onClick={() => setShowAdd(true)}
-                        className="bg-accent hover:bg-accent/90 text-white px-7 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-accent/20"
+                        className="bg-accent hover:opacity-90 text-white px-10 py-5 rounded-xl font-black text-sm uppercase tracking-[0.3em] transition-all flex items-center gap-4 shadow-2xl shadow-accent/40 hover:-translate-y-1 active:scale-95 italic"
                     >
-                        <Plus size={18} /> Set Your First Goal
+                        <Plus size={24} strokeWidth={3} /> Set First Objective
                     </button>
                 </div>
             ) : (
-                <div className="grid gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-10">
                     {goals.map(goal => {
                         const isCompleted = goal.status === 'Completed';
                         const deadlineDate = new Date(goal.deadline);
@@ -123,90 +130,121 @@ export function Goals() {
 
                         return (
                             <div key={goal.id} className={cn(
-                                'momentum-card p-6 flex flex-col gap-4 group transition-all duration-300',
-                                isCompleted
-                                    ? 'border-success/30'
-                                    : isPastDue
-                                        ? 'border-red-400/20 dark:border-red-500/20 hover:border-red-400/30'
-                                        : 'hover:border-slate-300 dark:hover:border-slate-600'
+                                'momentum-card p-10 flex flex-col gap-10 group/card border-slate-100 dark:border-white/[0.03]',
+                                isCompleted && 'border-success/30 bg-success/[0.01]',
+                                isPastDue && 'border-danger/30 bg-danger/[0.02]'
                             )}>
-                                <div className="flex justify-between items-start gap-4">
-                                    <div className="flex items-center gap-4 min-w-0">
-                                        {/* Status icon */}
+                                <div className="flex justify-between items-start gap-8">
+                                    <div className="flex items-start gap-8 min-w-0">
+                                        {/* Status Unit */}
                                         <div className={cn(
-                                            'w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center border',
+                                            'w-20 h-20 rounded-2xl flex-shrink-0 flex items-center justify-center border-2 transition-all duration-700',
                                             isCompleted
-                                                ? 'bg-success/20 border-success/40 text-success'
+                                                ? 'bg-success/10 border-success/30 text-success shadow-[0_0_30px_rgba(16,185,129,0.2)]'
                                                 : isPastDue
-                                                    ? 'bg-red-500/10 border-red-400/30 text-red-500 dark:text-red-400'
-                                                    : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'
+                                                    ? 'bg-danger/10 border-danger/30 text-danger'
+                                                    : 'bg-slate-50 dark:bg-white/[0.02] border-slate-100 dark:border-white/5 text-slate-300 group-hover/card:border-accent/30 group-hover/card:text-accent group-hover/card:scale-105'
                                         )}>
-                                            {isCompleted ? <CheckCircle2 size={24} /> : <Target size={24} />}
+                                            {isCompleted ? <CheckCircle2 size={36} strokeWidth={3} /> : <Target size={36} strokeWidth={3} />}
                                         </div>
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 flex-1">
+                                            <span className="section-label">Objective Module</span>
                                             <h3 className={cn(
-                                                'text-xl font-bold tracking-tight truncate',
-                                                isCompleted ? 'text-slate-400 dark:text-slate-400 line-through' : 'text-slate-900 dark:text-slate-100'
+                                                'text-3xl font-black tracking-tighter truncate leading-none italic uppercase mb-4',
+                                                isCompleted ? 'text-slate-400 dark:text-slate-600 line-through' : 'text-slate-900 dark:text-white'
                                             )}>
                                                 {goal.title}
                                             </h3>
-                                            <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                <span className="text-accent bg-accent/10 px-2 py-0.5 rounded-sm uppercase text-[10px] tracking-wider font-bold">
+                                            <div className="flex flex-wrap items-center gap-4">
+                                                <span className="text-accent bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 text-[9px] tracking-[0.3em] font-black uppercase italic">
                                                     {goal.category}
                                                 </span>
-                                                <span className={cn('flex items-center gap-1 text-xs font-medium', isPastDue && !isCompleted ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500')}>
-                                                    Due {format(deadlineDate, 'MMM d, yyyy')} ({formatDistanceToNow(deadlineDate, { addSuffix: true })})
+                                                <span className={cn('flex items-center gap-2 text-[10px] font-black tracking-[0.1em] uppercase italic', isPastDue && !isCompleted ? 'text-danger' : 'text-slate-400 dark:text-slate-600')}>
+                                                    Due {format(deadlineDate, 'MMM d, yyyy')}
                                                 </span>
-                                                {isPastDue && !isCompleted && (
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 dark:text-red-400 bg-red-500/10 px-2 py-0.5 rounded-sm">
-                                                        Overdue
-                                                    </span>
-                                                )}
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Progress % + actions */}
-                                    <div className="flex items-center gap-3 flex-shrink-0">
-                                        <div className="text-right">
-                                            <p className="text-3xl font-bold font-sans tracking-tight text-slate-900 dark:text-slate-100">{goal.progress}%</p>
-                                            <p className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold">{goal.status}</p>
+                                    {/* Velocity readout */}
+                                    <div className="flex flex-col items-end gap-6 flex-shrink-0">
+                                        <div className="text-right flex flex-col items-end">
+                                            <span className="section-label mb-1">Yield</span>
+                                            <div className="flex items-baseline gap-1">
+                                                <p className={cn(
+                                                    "text-5xl font-black tracking-tighter leading-none italic",
+                                                    isCompleted ? "text-success" : "text-slate-900 dark:text-white"
+                                                )}>{goal.progress}</p>
+                                                <span className="text-xl font-black italic opacity-30">%</span>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => setEditingGoal(goal)} title="Edit goal"
-                                                className="text-slate-400 hover:text-accent transition-colors">
-                                                <Pencil size={16} />
+                                        <div className="flex items-center gap-3 opacity-0 group-hover/card:opacity-100 transition-all duration-500 translate-x-4 group-hover/card:translate-x-0">
+                                             <button onClick={() => setEditingGoal(goal)}
+                                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-white/10 text-slate-400 hover:text-accent hover:border-accent/40 hover:scale-110 transition-all shadow-lg">
+                                                <Pencil size={16} strokeWidth={3} />
                                             </button>
-                                            <button onClick={() => setDeletingGoal(goal)} title="Delete goal"
-                                                className="text-slate-400 hover:text-red-400 transition-colors">
-                                                <Trash2 size={16} />
+                                            <button onClick={() => setDeletingGoal(goal)}
+                                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-white/10 text-slate-400 hover:text-danger hover:border-danger/40 hover:scale-110 transition-all shadow-lg">
+                                                <Trash2 size={16} strokeWidth={3} />
                                             </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Progress bar + slider */}
-                                <div className="mt-2 flex flex-col gap-2">
-                                    <div className="flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500 tracking-wider">
-                                        <span>PROGRESS</span>
-                                        <span>{goal.progress}%</span>
+                                {/* Progress Engine */}
+                                <div className="mt-4 space-y-6">
+                                     <div className="flex justify-between items-end">
+                                        <div className="flex flex-col">
+                                            <span className="section-label mb-1">Time Component</span>
+                                            <span className={cn(
+                                                "text-xs font-black uppercase italic tracking-widest",
+                                                isPastDue && !isCompleted ? "text-danger" : "text-slate-500 dark:text-slate-400"
+                                            )}>{formatDistanceToNow(deadlineDate, { addSuffix: true })}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="section-label mb-1">Status</span>
+                                            <span className={cn(
+                                                "text-xs font-black italic tracking-widest leading-none",
+                                                isCompleted ? "text-success" : "text-accent"
+                                            )}>{goal.status.toUpperCase()}</span>
+                                        </div>
                                     </div>
-                                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
-                                        <div
-                                            className={cn(
-                                                'h-full rounded-full transition-all duration-500',
-                                                isCompleted ? 'bg-success' : 'bg-gradient-to-r from-accent to-violet-400'
-                                            )}
-                                            style={{ width: `${goal.progress}%` }}
-                                        />
+                                    
+                                    {/* Structural Progress Bar */}
+                                    <div className="relative">
+                                        <div className="h-6 w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-100 dark:border-white/5 rounded-lg overflow-hidden p-0.5">
+                                            <div
+                                                className={cn(
+                                                    'h-full transition-all duration-1000 ease-out flex',
+                                                    isCompleted ? 'bg-success' : 'bg-accent'
+                                                )}
+                                                style={{ width: `${goal.progress}%` }}
+                                            >
+                                                <div className="w-full h-full opacity-10 bg-[length:15px_15px]" 
+                                                     style={{ backgroundImage: 'linear-gradient(90deg, #fff 1px, transparent 1px)' }}></div>
+                                            </div>
+                                        </div>
+                                        {/* Dynamic Scale */}
+                                        <div className="absolute top-0 left-0 w-full h-full flex justify-between px-1 pointer-events-none opacity-20">
+                                            {[...Array(11)].map((_, i) => (
+                                                <div key={i} className="h-full w-px bg-slate-400 dark:bg-white" />
+                                            ))}
+                                        </div>
                                     </div>
+
                                     {!isCompleted && (
-                                        <input type="range" min="0" max="100" value={goal.progress}
-                                            onChange={e => updateGoalProgress(goal.id, parseInt(e.target.value, 10))}
-                                            className="w-full h-1 bg-transparent rounded-full appearance-none cursor-pointer accent-accent mt-0.5"
-                                            title={`Progress: ${goal.progress}%`}
-                                        />
+                                        <div className="relative group/slider pt-4 px-2">
+                                            <input type="range" min="0" max="100" value={goal.progress}
+                                                onChange={e => handleProgressUpdate(goal.id, parseInt(e.target.value, 10))}
+                                                className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-accent 
+                                                       hover:scale-y-125 transition-all duration-300"
+                                            />
+                                        </div>
                                     )}
+                                </div>
+                                {/* Inset Footer */}
+                                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover/card:opacity-20 transition-opacity">
+                                     <Target size={120} strokeWidth={0.5} />
                                 </div>
                             </div>
                         );
@@ -229,5 +267,6 @@ export function Goals() {
                 onCancel={() => setDeletingGoal(null)}
             />
         </div>
+        </>
     );
 }

@@ -9,24 +9,42 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                // These two are CSS-variable–driven so they flip automatically with the theme.
-                // They do NOT use opacity modifiers in the codebase, so this is safe.
                 background: 'var(--bg-primary)',
                 card: 'var(--bg-secondary)',
                 sidebar: 'var(--bg-sidebar)',
-                // Static values — used with opacity modifiers (/10, /20 etc.) so they stay fixed
-                accent: '#8B5CF6',
-                success: '#22C55E',
-                warning: '#FACC15',
+                // Modern, vibrant palette
+                accent: {
+                  DEFAULT: '#6366F1', // Indigo 500
+                  hover: '#4F46E5',   // Indigo 600
+                  soft: 'rgba(99, 102, 241, 0.15)',
+                },
+                success: {
+                    DEFAULT: '#10B981', // Emerald 500
+                    soft: 'rgba(16, 185, 129, 0.15)',
+                },
+                warning: {
+                    DEFAULT: '#F59E0B', // Amber 500
+                    soft: 'rgba(245, 158, 11, 0.15)',
+                },
+                danger: {
+                    DEFAULT: '#EF4444', // Red 500
+                    soft: 'rgba(239, 68, 68, 0.15)',
+                }
             },
             borderRadius: {
-                xl: '16px',
+                '3xl': '24px',
+                '2xl': '18px',
+                'xl': '14px',
             },
             spacing: {
-                section: '24px',
+                section: '32px',
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            },
+            boxShadow: {
+                'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.04)',
+                'premium-dark': '0 20px 40px -15px rgba(0, 0, 0, 0.4), 0 10px 20px -10px rgba(0, 0, 0, 0.3)',
             }
         },
     },
