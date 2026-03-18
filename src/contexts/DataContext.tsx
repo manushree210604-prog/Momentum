@@ -9,9 +9,11 @@ interface DataContextType {
     goals: Goal[];
     stats: UserStats;
     addHabit: (title: string, category: string) => void;
+    editHabit: (id: string, title: string, category: string) => void;
     deleteHabit: (id: string) => void;
     toggleHabitDate: (id: string, dateStr: string) => void;
     addGoal: (title: string, category: string, deadline: number) => void;
+    editGoal: (id: string, title: string, category: string, deadline: number) => void;
     updateGoalProgress: (id: string, progress: number) => void;
     deleteGoal: (id: string) => void;
 }
@@ -55,6 +57,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             longestStreak: 0
         };
         const updated = [...habits, newHabit];
+        setHabits(updated);
+        storage.saveHabits(updated);
+    };
+
+    const editHabit = (id: string, title: string, category: string) => {
+        const updated = habits.map(h => h.id === id ? { ...h, title, category } : h);
         setHabits(updated);
         storage.saveHabits(updated);
     };
@@ -136,6 +144,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         storage.saveGoals(updated);
     };
 
+    const editGoal = (id: string, title: string, category: string, deadline: number) => {
+        const updated = goals.map(g => g.id === id ? { ...g, title, category, deadline } : g);
+        setGoals(updated);
+        storage.saveGoals(updated);
+    };
+
     const deleteGoal = (id: string) => {
         const updated = goals.filter(g => g.id !== id);
         setGoals(updated);
@@ -144,7 +158,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return (
         <DataContext.Provider value={{
-            habits, goals, stats, addHabit, deleteHabit, toggleHabitDate, addGoal, updateGoalProgress, deleteGoal
+            habits, goals, stats, addHabit, editHabit, deleteHabit, toggleHabitDate, addGoal, editGoal, updateGoalProgress, deleteGoal
         }}>
             {children}
         </DataContext.Provider>
