@@ -11,4 +11,23 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React libs
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Charts
+          'vendor-charts': ['recharts'],
+          // Animation
+          'vendor-motion': ['framer-motion'],
+          // Icons
+          'vendor-icons': ['lucide-react'],
+          // Utilities
+          'vendor-utils': ['date-fns', 'uuid', 'clsx', 'tailwind-merge'],
+        },
+      },
+    },
+  },
 })
