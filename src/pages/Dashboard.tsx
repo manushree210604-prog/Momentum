@@ -1,4 +1,5 @@
 import { useDataContext } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useMemo } from 'react';
 import { format, subDays, isSameWeek, isSameMonth } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -7,6 +8,7 @@ import { cn } from '../lib/utils';
 
 export function Dashboard() {
     const { habits, stats } = useDataContext();
+    const { user } = useAuth();
 
     const totalHabits = habits.length;
 
@@ -60,10 +62,20 @@ export function Dashboard() {
             {/* ── Header ── */}
             <header className="flex justify-between items-end mb-16 px-2">
                 <div>
-                   <span className="section-label">Operations Console</span>
-                    <h1 className="text-6xl font-black tracking-tighter mb-4 text-slate-900 dark:text-white leading-none">
-                        Dashboard
-                    </h1>
+                    <span className="section-label">Operations Console</span>
+                    {user ? (
+                      <h1 className="text-6xl font-black tracking-tighter mb-4 text-slate-900 dark:text-white leading-none">
+                        {user.display_name}'s OPS
+                      </h1>
+                    ) : (
+                      /* Skeleton while name loads */
+                      <div
+                        className="skeleton-line mb-4"
+                        style={{ width: 280, height: 64, borderRadius: 8 }}
+                        aria-label="Loading operator name…"
+                        role="status"
+                      />
+                    )}
                     <p className="text-xl text-slate-500 dark:text-slate-400 font-bold tracking-tight italic opacity-80">Build your legacy, one discipline at a time.</p>
                 </div>
                 <div className="hidden md:flex items-center gap-4">

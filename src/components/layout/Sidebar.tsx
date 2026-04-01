@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
-import { Home, CheckSquare, BarChart2, Target, Zap, X, Menu, TrendingUp } from 'lucide-react';
+import { Home, CheckSquare, BarChart2, Target, Zap, X, Menu, TrendingUp, LogOut } from 'lucide-react';
 import { useDataContext } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../ThemeToggle';
 import { useEffect } from 'react';
 import { cn } from '../../lib/utils';
@@ -12,6 +13,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const { stats } = useDataContext();
+    const { user, logout } = useAuth();
 
     useEffect(() => {
         onClose();
@@ -128,8 +130,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                             <div className="p-5">
                                 <div className="flex justify-between items-start mb-5">
-                                    <div>
+                                    <div className="min-w-0 flex-1">
                                         <span className="section-label mb-0.5">Operator Profile</span>
+                                        {user && (
+                                            <p className="text-[11px] font-black text-accent truncate tracking-wide leading-none mb-1.5">
+                                                {user.display_name}
+                                            </p>
+                                        )}
                                         <div className="flex items-baseline gap-2 mt-1">
                                             <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter italic leading-none">
                                                 LVL {stats.level}
@@ -137,7 +144,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                             <TrendingUp size={14} className="text-accent mb-0.5" strokeWidth={3} />
                                         </div>
                                     </div>
-                                    <div className="px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-xl animate-float">
+                                    <div className="px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-xl animate-float flex-shrink-0">
                                         <p className="text-[10px] text-accent font-black tracking-widest leading-none">{stats.xp} XP</p>
                                     </div>
                                 </div>
@@ -160,6 +167,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Logout button */}
+                        <button
+                            onClick={logout}
+                            id="sidebar-logout-btn"
+                            className={cn(
+                                'w-full flex items-center gap-3 px-4 py-3 rounded-xl',
+                                'border-2 border-red-500/10 bg-red-500/5',
+                                'text-red-400/70 hover:text-red-400 hover:border-red-500/25 hover:bg-red-500/10',
+                                'font-black text-[10px] tracking-[0.25em] uppercase',
+                                'transition-all duration-300 group'
+                            )}
+                            aria-label="Terminate session and log out"
+                        >
+                            <LogOut size={15} strokeWidth={2.5} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
+                            Terminate Session
+                        </button>
                     </div>
                 </div>
             </aside>
